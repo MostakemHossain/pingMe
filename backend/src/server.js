@@ -4,11 +4,14 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.js';
 import messageRoutes from "./routes/message.route.js";
 import { connectDB } from './lib/db.js';
+import cors from "cors";
 
 const app= express();
 dotenv.config();
 const PORT= process.env.PORT || 4500;
 const __dirname= path.resolve(); 
+app.use(express.json());
+app.use(cors());
 
 
 
