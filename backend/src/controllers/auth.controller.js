@@ -1,3 +1,5 @@
+import { sendWelcomeEmail } from "../emails/email-handers.js";
+import { ENV } from "../lib/env.js";
 import { generateToken } from "../lib/utils.js";
 import { User } from "../models/User.js";
 import bcrypt from "bcrypt";
@@ -26,20 +28,19 @@ export const signUp = async (req, res) => {
     }
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     // create new user
     const newUser = new User({
       fullName,
       email,
       password: hashedPassword,
     });
-    
+
     if (newUser) {
-      
-      generateToken (newUser._id, res);
+      generateToken(newUser._id, res);
       await newUser.save();
 
-      return res.status(201).json({
+      res.status(201).json({
         message: "User created successfully",
         user: {
           _id: newUser._id,
@@ -48,6 +49,13 @@ export const signUp = async (req, res) => {
           profilePic: newUser.profilePic,
         },
       });
+      // send the user a welcome email
+      try {
+        await sendWelcomeEmail(newUser.email, newUser.fullName, ENV.CLIENT_URL);
+      } catch (error) {
+        console.log(error)
+
+      }
     } else {
       return res.status(500).json({ message: "Something went wrong" });
     }
