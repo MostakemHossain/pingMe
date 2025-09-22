@@ -6,6 +6,7 @@ import messageRoutes from "./routes/message.route.js";
 import { connectDB } from './lib/db.js';
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { arcjetProtection } from './middleware/arcject.middleware.js';
 
 const app= express();
 dotenv.config();
@@ -35,6 +36,6 @@ app.listen(PORT,()=>{
     connectDB();
 });
 
- app.get('/test',(req,res)=>{
+ app.get('/test',arcjetProtection,(req,res)=>{
     res.send("Hello from Express server!");
 });
