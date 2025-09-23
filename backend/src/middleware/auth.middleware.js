@@ -10,7 +10,6 @@ export const auth=async(req,res,next)=>{
             return res.status(401).json({message:"Unauthorized"})
         }
         const decoded=jwt.verify(token,ENV.JWT_SECRET);
-        console.log(decoded);
         if(!decoded){
             return res.status(401).json({message:"Unauthorized"})
         }
@@ -18,7 +17,6 @@ export const auth=async(req,res,next)=>{
         if(!user){
             return res.status(401).json({message:"Unauthorized"})
         }
-        console.log(user);
         req.user=user;
         next();
         
