@@ -7,13 +7,14 @@ import { connectDB } from './lib/db.js';
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { arcjetProtection } from './middleware/arcject.middleware.js';
+import { ENV } from './lib/env.js';
 
 const app= express();
 dotenv.config();
 const PORT= process.env.PORT || 4500;
 const __dirname= path.resolve(); 
 app.use(express.json());
-app.use(cors());
+app.use(cors({origin:ENV.CLIENT_URL,credentials:true}));
 app.use(cookieParser());
 
 
