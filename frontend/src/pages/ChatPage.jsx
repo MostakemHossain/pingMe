@@ -5,21 +5,12 @@ import { useAuthState } from '../store/useAuthStore'
 import Loading from '../components/Loading';
 
 const ChatPage = () => {
-  const { checkAuth, authUser, isCheckingAuth } = useAuthState();
+  const { logout} = useAuthState();
 
-  useEffect(() => {
-    checkAuth();
-  }, [authUser]);
 
-  if (isCheckingAuth) {
-    return <Loading/>;
-  }
-
-  return authUser ? (
-    <div>Check Auth</div>
-  ) : (
-    <Navigate to="/login" />
-  );
+  return <div>
+    hello
+  </div>
 }
 
 export default ChatPage;
