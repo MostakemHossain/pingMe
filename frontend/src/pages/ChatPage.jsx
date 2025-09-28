@@ -1,16 +1,40 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useAuthState } from '../store/useAuthStore'
-import Loading from '../components/Loading';
+import ActiveTabSwitch from "../components/ActiveTabSwitch";
+import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
+import ChatContainer from "../components/ChatContainer";
+import ChatList from "../components/ChatList";
+import ContactList from "../components/ContactList";
+import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
+import ProfileHeader from "../components/ProfileHeader";
+import { useChatStore } from "../store/useChatStore";
 
 const ChatPage = () => {
-  const { logout} = useAuthState();
+  const { activeTab, selectedUser } = useChatStore();
 
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-teal-500 to-emerald-600">
+      <div className="w-full max-w-6xl h-[800px] shadow-2xl rounded-lg overflow-hidden">
+        <BorderAnimatedContainer>
+         
+          <aside className="w-80 flex flex-col border-r border-gray-300 bg-[#f0f2f5]">
+            <ProfileHeader />
+            <ActiveTabSwitch />
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+              {activeTab === "chats" ? <ChatList /> : <ContactList />}
+            </div>
+          </aside>
 
-  return <div>
-    hello
-  </div>
-}
+          {/* Chat area (WhatsApp-style right) */}
+          <main className="flex-1 flex flex-col bg-white relative">
+            {selectedUser ? (
+              <ChatContainer />
+            ) : (
+              <NoConversationPlaceholder />
+            )}
+          </main>
+        </BorderAnimatedContainer>
+      </div>
+    </div>
+  );
+};
 
 export default ChatPage;
