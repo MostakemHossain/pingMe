@@ -6,12 +6,25 @@ import { LogOutIcon, Volume2Icon, VolumeOffIcon } from "lucide-react";
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
 const ProfileHeader = () => {
-  const { logout, authUser } = useAuthState();
+  const { logout, authUser,updateProfile } = useAuthState();
   const { toggleSound, isSoundEnabled } = useChatStore();
-  const { selectedImage, setSelectedImage } = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+ console.log(authUser?.user);
   const fileInputRef = useRef(null);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onloadend = async() => {
+      const base64Image= reader.result;
+      setSelectedImage(base64Image);
+      await updateProfile({ profilePic: base64Image });
+    
+    };
+   
   };
   return (
     <div className="p-6 border-b border-slate-700/50">
@@ -24,7 +37,7 @@ const ProfileHeader = () => {
               onClick={() => fileInputRef.current.click()}
             >
               <img
-                src={selectedImage || authUser?.profilePic || "/avater.png"}
+                src={selectedImage || authUser?.user?.profilePic || "/avater.png"}
                 alt="avatar"
                 className="w-full h-full object-cover"
               />
@@ -43,7 +56,7 @@ const ProfileHeader = () => {
           {/* userName and online text  */}
           <div>
             <h3 className="text-slate-200 font-medium text-base max-w-[180px] truncate">
-              {authUser?.fullName}
+              {authUser?.user?.fullName}
             </h3>
             <p className="text-xs text-slate-400">Online</p>
           </div>

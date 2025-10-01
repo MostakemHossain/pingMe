@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import ActiveTabSwitch from "../components/ActiveTabSwitch";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ChatContainer from "../components/ChatContainer";
@@ -6,9 +7,16 @@ import ContactList from "../components/ContactList";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 import ProfileHeader from "../components/ProfileHeader";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthState } from "../store/useAuthStore";
 
 const ChatPage = () => {
   const { activeTab, selectedUser } = useChatStore();
+  const {  authUser,checkAuth } = useAuthState();
+  useEffect(() => {
+    if (!authUser) {
+      checkAuth();
+    }
+  }, [authUser, checkAuth]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-teal-500 to-emerald-600">
