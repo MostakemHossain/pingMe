@@ -6,32 +6,31 @@ import { LogOutIcon, Volume2Icon, VolumeOffIcon } from "lucide-react";
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
 const ProfileHeader = () => {
-  const { logout, authUser,updateProfile } = useAuthState();
+  const { logout, authUser, updateProfile } = useAuthState();
   const { toggleSound, isSoundEnabled } = useChatStore();
   const [selectedImage, setSelectedImage] = useState(null);
 
- console.log(authUser?.user);
   const fileInputRef = useRef(null);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if(!file) return;
+    if (!file) return;
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
-    reader.onloadend = async() => {
-      const base64Image= reader.result;
+    reader.onloadend = async () => {
+      const base64Image = reader.result;
       setSelectedImage(base64Image);
       await updateProfile({ profilePic: base64Image });
-    
     };
-   
   };
+
   return (
     <div className="p-6 border-b border-slate-700/50">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {/* AVATAR  */}
-          <div className="">
+          {/* AVATAR */}
+          <div className="relative">
             <button
               className="size-14 rounded-full overflow-hidden relative group"
               onClick={() => fileInputRef.current.click()}
@@ -45,6 +44,9 @@ const ProfileHeader = () => {
                 <span className="text-white text-sm">Change</span>
               </div>
             </button>
+            {/* GREEN ONLINE INDICATOR */}
+            <span className="absolute -top-1 -right-1 block size-4 rounded-full bg-green-500 border-2 border-white"></span>
+            
             <input
               type="file"
               className="hidden"
@@ -53,24 +55,27 @@ const ProfileHeader = () => {
               accept="image/*"
             />
           </div>
-          {/* userName and online text  */}
+
+          {/* userName and online text */}
           <div>
-            <h3 className="text-slate-200 font-medium text-base max-w-[180px] truncate">
+            <h3 className="text-black font-medium text-base max-w-[180px] truncate">
               {authUser?.user?.fullName}
             </h3>
-            <p className="text-xs text-slate-400">Online</p>
+            <p className="text-xs text-green-600">Online</p>
           </div>
         </div>
-        {/* BUTTONS  */}
+
+        {/* BUTTONS */}
         <div className="flex gap-4 items-center">
-          {/* LOGOUT  */}
+          {/* LOGOUT */}
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
             onClick={logout}
           >
             <LogOutIcon className="size-5" />
           </button>
-          {/* SOUND TOGGLE  */}
+
+          {/* SOUND TOGGLE */}
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
             onClick={() => {
@@ -83,7 +88,7 @@ const ProfileHeader = () => {
           >
             {isSoundEnabled ? (
               <Volume2Icon className="size-5" />
-            ) :  (
+            ) : (
               <VolumeOffIcon className="size-5" />
             )}
           </button>

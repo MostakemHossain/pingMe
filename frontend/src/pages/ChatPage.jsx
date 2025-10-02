@@ -10,7 +10,7 @@ import { useChatStore } from "../store/useChatStore";
 import { useAuthState } from "../store/useAuthStore";
 
 const ChatPage = () => {
-  const { activeTab, selectedUser } = useChatStore();
+  const { activeChat, selectedUser } = useChatStore();
   const {  authUser,checkAuth } = useAuthState();
   useEffect(() => {
     if (!authUser) {
@@ -27,7 +27,7 @@ const ChatPage = () => {
             <ProfileHeader />
             <ActiveTabSwitch />
             <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-              {activeTab === "chats" ? <ChatList /> : <ContactList />}
+              {activeChat === "chats" ? <ChatList /> : <ContactList />}
             </div>
           </aside>
 
