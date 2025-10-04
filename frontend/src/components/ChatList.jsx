@@ -15,7 +15,7 @@ const ChatList = () => {
     return <UserLoadingSkeleton />;
   }
 
-  if (!chats || chats.length === 0) {
+  if (!chats || chats?.length === 0) {
     return <NoChatFound />;
   }
 
