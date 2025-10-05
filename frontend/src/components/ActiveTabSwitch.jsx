@@ -6,7 +6,7 @@ const ActiveTabSwitch = () => {
   const { activeChat, setActiveTab } = useChatStore();
 
   return (
-    <div className="w-full flex justify-center py-2">
+    <div className="w-full flex justify-center py-2 px-2 sm:px-4">
       <Tabs
         value={activeChat}
         onValueChange={(value) => setActiveTab(value)}
@@ -15,18 +15,31 @@ const ActiveTabSwitch = () => {
         <TabsList className="w-full grid grid-cols-2 rounded-xl bg-gray-100 p-1 shadow-md">
           <TabsTrigger
             value="chats"
-            className="w-full rounded-lg data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-gray-700 hover:bg-emerald-100 transition-colors"
+            className="w-full rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-400 data-[state=active]:via-blue-400 data-[state=active]:to-purple-500 data-[state=active]:text-white text-gray-700 hover:bg-gray-200 transition-colors animate-gradient-tab"
           >
             Chats
           </TabsTrigger>
           <TabsTrigger
             value="contacts"
-            className="w-full rounded-lg data-[state=active]:bg-green-600 data-[state=active]:text-white text-gray-700 hover:bg-green-100 transition-colors"
+            className="w-full rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-400 data-[state=active]:via-pink-400 data-[state=active]:to-purple-500 data-[state=active]:text-white text-gray-700 hover:bg-gray-200 transition-colors animate-gradient-tab"
           >
             Contacts
           </TabsTrigger>
         </TabsList>
       </Tabs>
+
+      <style jsx>{`
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        .animate-gradient-tab[data-state="active"] {
+          background-size: 200% 200%;
+          animation: gradientShift 6s ease infinite;
+        }
+      `}</style>
     </div>
   );
 };
