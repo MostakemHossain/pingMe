@@ -14,7 +14,6 @@ const MessageInput = () => {
   const { selectedUser, sendMessage } = useChatStore();
   const { authUser } = useAuthState();
 
-  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (

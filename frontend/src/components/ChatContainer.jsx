@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthState } from "../store/useAuthStore";
-import ChatHeader from "./ChatHeader";
 import NoConversationHistory from "./NoConversationHistory";
 import MessageInput from "./MessageInput";
+import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
+import ChatHeader from "./ChatHeader";
 
 const ChatContainer = () => {
-  const { getMessagesByUserId, selectedUser, messages } = useChatStore();
+  const { getMessagesByUserId, selectedUser, messages,isMessageLoading } = useChatStore();
   const { authUser } = useAuthState();
   const chatEndRef = useRef(null);
 
@@ -60,7 +61,7 @@ const ChatContainer = () => {
       <ChatHeader />
 
       <div className="flex-1 px-4 md:px-6 py-4 overflow-y-auto">
-        {messages?.length > 0 ? (
+        {messages?.length > 0 && !isMessageLoading ? (
           <div className="flex flex-col space-y-4">
             {messages.map((msg, index) => {
               const isSender = msg?.senderId === authUser?.user?._id;
@@ -134,7 +135,7 @@ const ChatContainer = () => {
             })}
             <div ref={chatEndRef} />
           </div>
-        ) : (
+        ) : isMessageLoading ? <MessagesLoadingSkeleton/>:(
           <NoConversationHistory name={selectedUser?.fullName} />
         )}
       </div>
