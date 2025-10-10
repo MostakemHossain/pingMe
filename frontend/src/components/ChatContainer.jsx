@@ -7,14 +7,13 @@ import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 import ChatHeader from "./ChatHeader";
 
 const ChatContainer = () => {
-  const { getMessagesByUserId, selectedUser, messages,isMessageLoading } = useChatStore();
+  const { getMessagesByUserId, selectedUser, messages, isMessageLoading } =
+    useChatStore();
   const { authUser } = useAuthState();
   const chatEndRef = useRef(null);
 
   useEffect(() => {
-    if (selectedUser?._id) {
-      getMessagesByUserId(selectedUser._id);
-    }
+    if (selectedUser?._id) getMessagesByUserId(selectedUser._id);
   }, [selectedUser, getMessagesByUserId]);
 
   useEffect(() => {
@@ -24,11 +23,7 @@ const ChatContainer = () => {
   const formatTime = (timestamp) => {
     const now = new Date();
     const msgDate = new Date(timestamp);
-    const diffTime = now - msgDate;
-    const diffMinutes = Math.floor(diffTime / 1000 / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
+    const diffDays = Math.floor((now - msgDate) / 1000 / 60 / 60 / 24);
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     return msgDate.toLocaleDateString([], {
@@ -38,13 +33,12 @@ const ChatContainer = () => {
     });
   };
 
-  const formatClock = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString([], {
+  const formatClock = (timestamp) =>
+    new Date(timestamp).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-  };
 
   if (!selectedUser) {
     return (
@@ -88,7 +82,6 @@ const ChatContainer = () => {
                       isSender ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {/* Receiver Avatar */}
                     {!isSender && (
                       <img
                         src={selectedUser?.profilePic || "/default-avatar.png"}
@@ -99,25 +92,43 @@ const ChatContainer = () => {
 
                     <div
                       className={`relative max-w-[80%] md:max-w-[65%] px-4 py-2.5 rounded-2xl text-sm shadow-md transition-all duration-300 ${
-                        isSender
-                          ? "bg-[#dcf8c6] text-gray-900 rounded-br-none"
-                          : "bg-white text-gray-900 rounded-bl-none"
+                        msg.text
+                          ? isSender
+                            ? "bg-[#dcf8c6] text-gray-900 rounded-br-none"
+                            : "bg-white text-gray-900 rounded-bl-none"
+                          : ""
                       }`}
                       style={{
                         borderTopLeftRadius: isSender ? "1rem" : "0.5rem",
                         borderTopRightRadius: isSender ? "0.5rem" : "1rem",
+                        padding: msg.text ? "0.625rem 1rem" : "0",
                       }}
                     >
-                      <p className="whitespace-pre-wrap break-words leading-relaxed">
-                        {msg.text}
-                      </p>
-                      <span
-                        className={`text-[10px] opacity-70 block mt-1 text-right ${
-                          isSender ? "text-gray-600" : "text-gray-500"
-                        }`}
-                      >
-                        {formatClock(msg?.createdAt)}
-                      </span>
+                      {msg.image && (
+                        <img
+                          src={msg.image}
+                          alt="message"
+                          className={`w-full h-64 object-cover rounded-md ${
+                            msg.text ? "mb-1" : ""
+                          }`}
+                        />
+                      )}
+
+                      {msg.text && (
+                        <p className="whitespace-pre-wrap break-words leading-relaxed">
+                          {msg.text}
+                        </p>
+                      )}
+
+                      {msg.text && (
+                        <span
+                          className={`text-[10px] opacity-70 block mt-1 text-right ${
+                            isSender ? "text-gray-600" : "text-gray-500"
+                          }`}
+                        >
+                          {formatClock(msg?.createdAt)}
+                        </span>
+                      )}
                     </div>
 
                     {isSender && (
@@ -135,11 +146,14 @@ const ChatContainer = () => {
             })}
             <div ref={chatEndRef} />
           </div>
-        ) : isMessageLoading ? <MessagesLoadingSkeleton/>:(
+        ) : isMessageLoading ? (
+          <MessagesLoadingSkeleton />
+        ) : (
           <NoConversationHistory name={selectedUser?.fullName} />
         )}
       </div>
-      <MessageInput/>
+
+      <MessageInput />
     </div>
   );
 };
