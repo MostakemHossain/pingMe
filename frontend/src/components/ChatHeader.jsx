@@ -1,9 +1,13 @@
 import React, { useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthState } from "../store/useAuthStore";
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore();
+  const {onlineUsers}= useAuthState();
+
+  const isOnline=  onlineUsers.includes(selectedUser._id);
 
   useEffect(() => {
     const handleEscKey = (event) => {
@@ -32,7 +36,15 @@ const ChatHeader = () => {
           <h4 className="text-sm sm:text-base font-medium truncate">
             {selectedUser.fullName}
           </h4>
-          <span className="text-xs text-green-500">Online</span>
+          <span
+            className={`text-xs ${
+              isOnline ? "text-green-500" : "text-gray-500"
+            }`}
+          >
+            {isOnline
+              ? "Online"
+              : "Last seen recently"}
+          </span>
         </div>
       </div>
 
