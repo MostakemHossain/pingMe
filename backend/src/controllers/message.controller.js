@@ -1,4 +1,5 @@
 import cloudinary from "../lib/cloudinary.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 import { Message } from "../models/Message.js";
 import { User } from "../models/User.js";
 
@@ -53,13 +54,12 @@ export const sendMessage = async (req, res) => {
         message: "Cannot sent message to your self",
       });
     }
-   const receiverIdExists= await User.exists({_id:receiverId});
-   if(!receiverIdExists){
-    return res.status(400).json({
+    const receiverIdExists = await User.exists({ _id: receiverId });
+    if (!receiverIdExists) {
+      return res.status(400).json({
         message: "Receiver Not found",
       });
-   }
-
+    }
 
     let imageUrl;
     if (image) {
@@ -74,6 +74,11 @@ export const sendMessage = async (req, res) => {
     });
     await message.save();
     // todo :send message in realtime when user is online
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", message);
+    }
+
     res.status(200).json(message);
   } catch (error) {
     console.log("Error in send message", error);

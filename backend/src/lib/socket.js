@@ -18,6 +18,11 @@ const io = new Server(server, {
 
 io.use(socketAuthMiddleware);
 
+// check the user online or not
+export function getReceiverSocketId(userId){
+  return userSocketMap[userId];
+}
+
 // storing online users
 const userSocketMap = new Map();
 io.on("connection", (socket) => {
