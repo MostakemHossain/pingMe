@@ -15,8 +15,15 @@ export const useAuthState = create((set, get) => ({
   onlineUsers: [],
 
   checkAuth: async () => {
+    const token = localStorage.getItem("token");
+  if (!token) {
+    set({ authUser: null, isCheckingAuth: false });
+    return;
+  }
     try {
-      const res = await axiosInstance.get("/auth/check");
+      const res = await axiosInstance.get("/auth/check",{
+        headers: { Authorization: `${token}` },
+      });
       get().connectSocket(); 
       set({ authUser: res.data });
     } catch (error) {

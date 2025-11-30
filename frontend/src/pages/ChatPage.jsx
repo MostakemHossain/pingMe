@@ -10,7 +10,6 @@ import { useChatStore } from "../store/useChatStore";
 import { useAuthState } from "../store/useAuthStore";
 import { X } from "lucide-react";
 
-
 const chatBg =
   "https://i.ibb.co/1R0w2Rh/whatsapp-bg.png";
 
