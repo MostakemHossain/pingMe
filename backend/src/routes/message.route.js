@@ -5,6 +5,7 @@ import {
   getAllContacts,
   getChatPartners,
   getMessagesByUserId,
+  reactToMessage,
   sendMessage,
 } from "../controllers/message.controller.js";
 import { auth } from "../middleware/auth.middleware.js";
@@ -19,5 +20,7 @@ router.get("/:id", getMessagesByUserId);
 router.post("/send/:id", sendMessage);
 router.delete("/delete/:id", deleteMessageById);
 router.put("/edit/:id", editMessageById);
+router.post("/:id/react", reactToMessage);
+
 
 export default router;

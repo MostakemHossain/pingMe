@@ -191,4 +191,51 @@ export const editMessageById = async (req, res) => {
 };
 
 
+export const reactToMessage = async (req, res) => {
+
+  try {
+    const messageId = req.params.id;
+    const { emoji } = req.body;
+    const loggedUserId = req.user._id;
+
+    if (!emoji) return res.status(400).json({ message: "Emoji is required" });
+
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    // Only the receiver can react
+    if (!message.receiverId.equals(loggedUserId)) {
+      return res.status(403).json({ message: "You can only react to received messages" });
+    }
+
+    // Check if user already reacted
+    const existingReactionIndex = message.reactions.findIndex(
+      (r) => r.userId.equals(loggedUserId)
+    );
+
+    if (existingReactionIndex > -1) {
+      // Update emoji
+      message.reactions[existingReactionIndex].emoji = emoji;
+    } else {
+      message.reactions.push({ userId: loggedUserId, emoji });
+    }
+
+    await message.save();
+
+    // Emit reaction in real-time
+    const { getReceiverSocketId, io } = await import("../lib/socket.js");
+    const receiverSocketId = getReceiverSocketId(message.senderId); // notify sender
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageReacted", message);
+    }
+
+    res.status(200).json({ message: "Reaction added", data: message });
+  } catch (error) {
+    console.log("Error reacting to message", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
 

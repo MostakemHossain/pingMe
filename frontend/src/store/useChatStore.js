@@ -131,6 +131,36 @@ export const useChatStore = create((set, get) => ({
       set({ messages: [...currentMessages, newMessage] });
     });
   },
+  reactToMessage: async (messageId, emoji) => {
+    const { messages, selectedUser } = get();
+    const { authUser } = useAuthState.getState();
+
+    // Optimistic update
+    const updatedMessagesOptimistic = messages.map((msg) => {
+      if (msg._id === messageId) {
+        const existingReactionIndex = msg.reactions.findIndex(r => r.userId === authUser.user._id);
+        if (existingReactionIndex > -1) {
+          msg.reactions[existingReactionIndex].emoji = emoji;
+        } else {
+          msg.reactions.push({ userId: authUser.user._id, emoji });
+        }
+      }
+      return msg;
+    });
+    set({ messages: updatedMessagesOptimistic });
+
+    try {
+      const res = await axiosInstance.post(`/messages/${messageId}/react`, { emoji });
+      const updatedMessages = messages.map((msg) =>
+        msg._id === messageId ? res.data.data : msg
+      );
+      toast.success("Reaction updated successfully");
+      set({ messages: updatedMessages });
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to react to message");
+      set({ messages }); // rollback
+    }
+  },
 
   unSubscribeToMessages: () => {
     const socket = useAuthState.getState().socket;
