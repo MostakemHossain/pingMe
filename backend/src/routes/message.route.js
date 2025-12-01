@@ -1,6 +1,7 @@
 import express from "express";
 import {
   deleteMessageById,
+  editMessageById,
   getAllContacts,
   getChatPartners,
   getMessagesByUserId,
@@ -17,5 +18,6 @@ router.get("/chats",getChatPartners);
 router.get("/:id", getMessagesByUserId);
 router.post("/send/:id", sendMessage);
 router.delete("/delete/:id", deleteMessageById);
+router.put("/edit/:id", editMessageById);
 
 export default router;

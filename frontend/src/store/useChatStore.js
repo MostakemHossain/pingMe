@@ -98,6 +98,26 @@ export const useChatStore = create((set, get) => ({
       toast.error(error?.response?.data?.message || "Failed to delete message");
     }
   },
+  editMessage: async (messageId, newText) => {
+    const { messages } = get();
+    const updatedMessagesOptimistic = messages.map((msg) =>
+      msg._id === messageId ? { ...msg, text: newText, edited: true } : msg
+    );
+    set({ messages: updatedMessagesOptimistic });
+
+    try {
+      const res = await axiosInstance.put(`/messages/edit/${messageId}`, { text: newText });
+
+      const updatedMessages = messages.map((msg) =>
+        msg._id === messageId ? res.data.data : msg
+      );
+      set({ messages: updatedMessages });
+      toast.success("Message edited successfully");
+    } catch (error) {
+      set({ messages }); 
+      toast.error(error?.response?.data?.message || "Failed to edit message");
+    }
+  },
 
   subscribeToMessages: () => {
     const { selectedUser, isSoundEnabled } = get();

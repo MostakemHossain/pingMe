@@ -14,6 +14,7 @@ const messageSchema = new mongoose.Schema(
     text: { type: String, trim: true, maxlength: 2000 },
     image: { type: String },
     deleted: { type: Boolean, default: false }, 
+    edited: { type: Boolean, default: false }, 
     
   },
   {

@@ -104,36 +104,38 @@ const ChatContainer = () => {
                         className={`relative px-4 py-2.5 rounded-2xl text-sm shadow-md transition-all duration-300 break-words
                         ${isSender ? "bg-[#dcf8c6] rounded-br-none" : "bg-white rounded-bl-none"}`}
                       >
-                        {msg.deleted ? (
-                          <p className="italic text-gray-400 text-sm">This message was deleted</p>
+                        {/* Display replied message snippet */}
+                        {msg.replyTo && !msg.deleted && (
+                          <div className="mb-1 px-2 py-1 bg-gray-100 rounded-l-md border-l-4 border-blue-500 text-xs text-gray-600">
+                            <strong>{msg.replyTo.senderName || "You"}:</strong> {msg.replyTo.text || "Image"}
+                          </div>
+                        )}
+
+                      
+                        {editingMessageId === msg._id ? (
+                          <div className="flex items-center space-x-2">
+                            <input
+                              value={editedText}
+                              onChange={(e) => setEditedText(e.target.value)}
+                              className="flex-1 border rounded px-2 py-1"
+                            />
+                            <button
+                              className="text-green-600 font-semibold"
+                              onClick={() => handleEditSubmit(msg._id)}
+                            >
+                              Save
+                            </button>
+                            <button
+                              className="text-red-500 font-semibold"
+                              onClick={() => setEditingMessageId(null)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         ) : (
                           <>
-                            {msg.replyTo && (
-                              <div className="mb-1 px-2 py-1 bg-gray-100 rounded-l-md border-l-4 border-blue-500 text-xs text-gray-600">
-                                <strong>{msg.replyTo.senderName || "You"}:</strong> {msg.replyTo.text || "Image"}
-                              </div>
-                            )}
-
-                            {editingMessageId === msg._id ? (
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  value={editedText}
-                                  onChange={(e) => setEditedText(e.target.value)}
-                                  className="flex-1 border rounded px-2 py-1"
-                                />
-                                <button
-                                  className="text-green-600 font-semibold"
-                                  onClick={() => handleEditSubmit(msg._id)}
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  className="text-red-500 font-semibold"
-                                  onClick={() => setEditingMessageId(null)}
-                                >
-                                  Cancel
-                                </button>
-                              </div>
+                            {msg.deleted ? (
+                              <p className="italic text-gray-400 text-sm">This message was deleted</p>
                             ) : (
                               <>
                                 {msg.image && (
@@ -143,18 +145,25 @@ const ChatContainer = () => {
                                     className={`w-full h-64 object-cover rounded-md ${msg.text ? "mb-1" : ""}`}
                                   />
                                 )}
-                                {msg.text && <p>{msg.text}</p>}
+                                {msg.text && (
+                                  <p>
+                                    {msg.text}{" "}
+                                    {msg?.edited && (
+                                      <span className="text-[10px] opacity-50 italic ml-1">(edited)</span>
+                                    )}
+                                  </p>
+                                )}
                               </>
                             )}
-
-                            <span className="text-[10px] opacity-70 block mt-1 text-right">
-                              {formatClock(msg?.createdAt)}
-                            </span>
                           </>
                         )}
 
-                        {/* Three-dot menu for sender */}
-                        {isSender && !msg.deleted && editingMessageId !== msg._id && (
+                        <span className="text-[10px] opacity-70 block mt-1 text-right">
+                          {formatClock(msg?.createdAt)}
+                        </span>
+
+                       
+                        {isSender && !msg?.deleted && editingMessageId !== msg._id && (
                           <div className="absolute top-1 right-1">
                             <button
                               onClick={() => setActiveMenuId(activeMenuId === msg._id ? null : msg._id)}

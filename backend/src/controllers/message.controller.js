@@ -137,8 +137,6 @@ export const deleteMessageById = async (req, res) => {
     message.image = null;    
 
     await message.save();
-
-    const messages = await Message.findById(messageId);
     const { getReceiverSocketId, io } = await import("../lib/socket.js");
     const receiverSocketId = getReceiverSocketId(message.receiverId);
     if (receiverSocketId) {
@@ -151,5 +149,46 @@ export const deleteMessageById = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const editMessageById = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const { text } = req.body;
+    const loggedUserId = req.user._id;
+
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ message: "Text is required to edit the message" });
+    }
+
+    // Find the message
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    // Only sender can edit the message
+    if (!message.senderId.equals(loggedUserId)) {
+      return res.status(403).json({ message: "You can only edit your own messages" });
+    }
+
+    // Update the message text and mark as edited
+    message.text = text;
+    message.edited = true;
+    await message.save();
+
+    // Notify receiver in real-time
+    const { getReceiverSocketId, io } = await import("../lib/socket.js");
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageEdited", message);
+    }
+
+    res.status(200).json({ message: "Message edited successfully", data: message });
+  } catch (error) {
+    console.log("Error in editing message", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 
 
