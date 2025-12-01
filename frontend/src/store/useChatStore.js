@@ -132,36 +132,43 @@ export const useChatStore = create((set, get) => ({
     });
   },
   reactToMessage: async (messageId, emoji) => {
-    const { messages, selectedUser } = get();
+    const { messages } = get();
     const { authUser } = useAuthState.getState();
-
+    const userId = authUser.user._id;
+  
     // Optimistic update
-    const updatedMessagesOptimistic = messages.map((msg) => {
+    const updatedMessages = messages.map((msg) => {
       if (msg._id === messageId) {
-        const existingReactionIndex = msg.reactions.findIndex(r => r.userId === authUser.user._id);
+        const reactions = msg.reactions ? [...msg.reactions] : [];
+        const existingReactionIndex = reactions.findIndex((r) => r.userId === userId);
+  
         if (existingReactionIndex > -1) {
-          msg.reactions[existingReactionIndex].emoji = emoji;
+          // If clicked same emoji, remove it
+          if (reactions[existingReactionIndex].emoji === emoji) {
+            reactions.splice(existingReactionIndex, 1);
+          } else {
+            // Replace with new emoji
+            reactions[existingReactionIndex].emoji = emoji;
+          }
         } else {
-          msg.reactions.push({ userId: authUser.user._id, emoji });
+          reactions.push({ userId, emoji });
         }
+  
+        return { ...msg, reactions };
       }
       return msg;
     });
-    set({ messages: updatedMessagesOptimistic });
-
+  
+    set({ messages: updatedMessages });
+  
     try {
-      const res = await axiosInstance.post(`/messages/${messageId}/react`, { emoji });
-      const updatedMessages = messages.map((msg) =>
-        msg._id === messageId ? res.data.data : msg
-      );
-      toast.success("Reaction updated successfully");
-      set({ messages: updatedMessages });
+      await axiosInstance.post(`/messages/${messageId}/react`, { emoji });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to react to message");
+      toast.error(error?.response?.data?.message || "Failed to react");
       set({ messages }); // rollback
     }
   },
-
+  
   unSubscribeToMessages: () => {
     const socket = useAuthState.getState().socket;
     socket.off("newMessage");

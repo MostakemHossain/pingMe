@@ -3,6 +3,7 @@ import path from "path";
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.js';
 import messageRoutes from "./routes/message.route.js";
+import groupRoutes from "./routes/group.route.js";
 import { connectDB } from './lib/db.js';
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 app.use("/api/auth",authRoutes);
 app.use("/api/messages",messageRoutes);
+app.use("/api/group",groupRoutes);
 
 // make ready for deployment
 if(process.env.NODE_ENV==="production"){

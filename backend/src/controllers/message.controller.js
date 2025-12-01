@@ -90,16 +90,16 @@ export const sendMessage = async (req, res) => {
 
 export const getChatPartners = async (req, res) => {
   try {
-    const loggedInUser = req.user._id;
+    const loggedInUser = req?.user._id;
     const messages = await Message.find({
       $or: [{ senderId: loggedInUser }, { receiverId: loggedInUser }],
     });
     const chatPartnersIds = [
       ...new Set(
         messages.map((msg) =>
-          msg.senderId.toString() === loggedInUser.toString()
-            ? msg.receiverId.toString()
-            : msg.senderId.toString()
+          msg?.senderId?.toString() === loggedInUser.toString()
+            ? msg?.receiverId?.toString()
+            : msg?.senderId?.toString()
         )
       ),
     ];
@@ -203,12 +203,10 @@ export const reactToMessage = async (req, res) => {
     const message = await Message.findById(messageId);
     if (!message) return res.status(404).json({ message: "Message not found" });
 
-    // Only the receiver can react
     if (!message.receiverId.equals(loggedUserId)) {
       return res.status(403).json({ message: "You can only react to received messages" });
     }
 
-    // Check if user already reacted
     const existingReactionIndex = message.reactions.findIndex(
       (r) => r.userId.equals(loggedUserId)
     );

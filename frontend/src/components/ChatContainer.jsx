@@ -32,16 +32,19 @@ const ChatContainer = () => {
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
   const menuRef = useRef(null);
 
+  // Fetch messages & subscribe
   useEffect(() => {
     if (selectedUser?._id) getMessagesByUserId(selectedUser._id);
     subscribeToMessages();
     return () => unSubscribeToMessages();
   }, [selectedUser]);
 
+  // Scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Close menu on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -69,6 +72,15 @@ const ChatContainer = () => {
     setEditingMessageId(null);
     setEditedText("");
     setActiveMenuId(null);
+  };
+
+  // Toggle reaction
+  const handleReact = (msgId, emoji) => {
+    const userId = authUser.user._id;
+    const message = messages.find((m) => m._id === msgId);
+    const hasReacted = message.reactions?.some((r) => r.userId === userId && r.emoji === emoji);
+
+    reactToMessage(msgId, emoji, hasReacted); 
   };
 
   if (!selectedUser) {
@@ -188,11 +200,11 @@ const ChatContainer = () => {
 
                         {/* Small right-side reaction modal */}
                         {!isSender && !msg.deleted && hoveredMessageId === msg._id && (
-                          <div className="absolute bottom-1 right-[-60px] flex flex-row bg-white border border-gray-200 shadow-lg rounded-full p-1 space-y-1 z-50">
+                          <div className="absolute bottom-1 right-[-60px] flex flex-row bg-white border border-gray-200 shadow-lg rounded-full p-1 z-50">
                             {REACTIONS.map((emoji) => (
                               <button
                                 key={emoji}
-                                onClick={() => reactToMessage(msg._id, emoji)}
+                                onClick={() => handleReact(msg._id, emoji)}
                                 className="w-8 h-8 flex items-center justify-center text-xl rounded-full hover:bg-gray-100 transition-all duration-150"
                               >
                                 {emoji}

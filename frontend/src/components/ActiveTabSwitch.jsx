@@ -12,18 +12,26 @@ const ActiveTabSwitch = () => {
         onValueChange={(value) => setActiveTab(value)}
         className="w-full"
       >
-        <TabsList className="w-full grid grid-cols-2 rounded-xl bg-gray-100 p-1 shadow-md">
+        <TabsList className="w-full grid grid-cols-3 rounded-xl bg-gray-100 p-1 shadow-md">
           <TabsTrigger
             value="chats"
             className="w-full rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-400 data-[state=active]:via-blue-400 data-[state=active]:to-purple-500 data-[state=active]:text-white text-gray-700 hover:bg-gray-200 transition-colors animate-gradient-tab"
           >
             Chats
           </TabsTrigger>
+
           <TabsTrigger
             value="contacts"
             className="w-full rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-400 data-[state=active]:via-pink-400 data-[state=active]:to-purple-500 data-[state=active]:text-white text-gray-700 hover:bg-gray-200 transition-colors animate-gradient-tab"
           >
             Contacts
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="groups"
+            className="w-full rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-400 data-[state=active]:via-orange-400 data-[state=active]:to-red-500 data-[state=active]:text-white text-gray-700 hover:bg-gray-200 transition-colors animate-gradient-tab"
+          >
+            Groups
           </TabsTrigger>
         </TabsList>
       </Tabs>

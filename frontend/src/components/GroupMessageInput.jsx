@@ -1,14 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useChatStore } from "../store/useChatStore";
-import { useAuthState } from "../store/useAuthStore";
 import { Send, Smile, Image } from "lucide-react";
 import Picker from "emoji-picker-react";
 import useKeyboardSound from "../hooks/useKeyboardSound.js";
 import toast from "react-hot-toast";
+import { useGroupStore } from "../store/useGroupStore.js";
 
-const MessageInput = ({ replyingMessage, setReplyingMessage }) => {
-  console.log("Replying Message:", replyingMessage);
-  
+const GroupMessageInput = ({ groupId, replyingMessage, setReplyingMessage }) => {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
   const [message, setMessage] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
@@ -18,9 +15,9 @@ const MessageInput = ({ replyingMessage, setReplyingMessage }) => {
   const emojiRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const { selectedUser, sendMessage, isSoundEnabled } = useChatStore();
-  const { authUser } = useAuthState();
+  const { sendGroupMessage, isSoundEnabled } = useGroupStore();
 
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (emojiRef.current && !emojiRef.current.contains(event.target)) {
@@ -33,23 +30,20 @@ const MessageInput = ({ replyingMessage, setReplyingMessage }) => {
 
   const handleSend = async () => {
     if ((!message.trim() && !imagePreview) || sending) return;
-    if (!selectedUser?._id) return;
+    if (!groupId) return;
 
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
     try {
       setSending(true);
-      await sendMessage({
+      await sendGroupMessage({
+        groupId,
         text: message.trim(),
         image: imagePreview,
-        senderId: authUser.user._id,
-        receiverId: selectedUser._id,
-        createdAt: new Date().toISOString(),
-        replyTo: replyingMessage ? replyingMessage : null, // Include reply info
       });
       setMessage("");
       setImagePreview(null);
-      setReplyingMessage(null); // Clear reply after sending
+      setReplyingMessage(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       console.log(err);
@@ -111,7 +105,6 @@ const MessageInput = ({ replyingMessage, setReplyingMessage }) => {
         </div>
       )}
 
-      {/* Image Preview */}
       {imagePreview && !sending && (
         <div className="relative w-24 h-24 mb-1">
           <img
@@ -188,4 +181,4 @@ const MessageInput = ({ replyingMessage, setReplyingMessage }) => {
   );
 };
 
-export default MessageInput;
+export default GroupMessageInput;
