@@ -6,7 +6,7 @@ import Picker from "emoji-picker-react";
 import useKeyboardSound from "../hooks/useKeyboardSound.js";
 import toast from "react-hot-toast";
 
-const MessageInput = () => {
+const MessageInput = ({ replyingMessage, setReplyingMessage }) => {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
   const [message, setMessage] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
@@ -43,9 +43,11 @@ const MessageInput = () => {
         senderId: authUser.user._id,
         receiverId: selectedUser._id,
         createdAt: new Date().toISOString(),
+        replyTo: replyingMessage ? replyingMessage : null, // Include reply info
       });
       setMessage("");
       setImagePreview(null);
+      setReplyingMessage(null); // Clear reply after sending
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       console.log(err);
@@ -87,6 +89,27 @@ const MessageInput = () => {
 
   return (
     <div className="relative flex flex-col gap-2 p-3 bg-[#f0f0f0] border-t border-gray-300">
+      {/* Reply Preview */}
+      {replyingMessage && (
+        <div className="mb-1 p-2 bg-gray-200 rounded-lg relative border-l-4 border-blue-500">
+          <div className="flex justify-between items-start">
+            <span className="text-xs font-semibold text-blue-600">
+              Replying to {replyingMessage.senderName || "You"}
+            </span>
+            <button
+              className="text-gray-500 text-sm ml-2"
+              onClick={() => setReplyingMessage(null)}
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-xs text-gray-700 truncate">
+            {replyingMessage.text || "Image"}
+          </p>
+        </div>
+      )}
+
+      {/* Image Preview */}
       {imagePreview && !sending && (
         <div className="relative w-24 h-24 mb-1">
           <img
@@ -103,6 +126,7 @@ const MessageInput = () => {
         </div>
       )}
 
+      {/* Input and Buttons */}
       <div className="flex items-center gap-2">
         <textarea
           className="flex-1 resize-none rounded-full px-4 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -114,6 +138,7 @@ const MessageInput = () => {
           disabled={sending}
         />
 
+        {/* Emoji Picker */}
         <div className="relative" ref={emojiRef}>
           <button
             onClick={() => setShowEmojiPicker((prev) => !prev)}
@@ -130,6 +155,7 @@ const MessageInput = () => {
           )}
         </div>
 
+        {/* Image Upload */}
         <button
           onClick={() => fileInputRef.current?.click()}
           className="p-2 rounded-full hover:bg-gray-200 transition"
@@ -146,9 +172,12 @@ const MessageInput = () => {
           disabled={sending}
         />
 
+        {/* Send Button */}
         <button
           onClick={handleSend}
-          className={`flex items-center justify-center p-2 rounded-full transition `}
+          className={`flex items-center justify-center p-2 rounded-full transition ${
+            sending ? "opacity-50 cursor-not-allowed" : "bg-blue-500 text-white"
+          }`}
         >
           <Send size={18} />
         </button>

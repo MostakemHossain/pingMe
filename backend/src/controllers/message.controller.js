@@ -114,3 +114,42 @@ export const getChatPartners = async (req, res) => {
     });
   }
 };
+
+export const deleteMessageById = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const loggedUserId = req.user._id;
+
+    // Find the message
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    // Only sender can delete the message
+    if (!message.senderId.equals(loggedUserId)) {
+      return res.status(403).json({ message: "You can only delete your own messages" });
+    }
+
+    
+    message.text = "This message was deleted";
+    message.deleted = true;   
+    message.image = null;    
+
+    await message.save();
+
+    const messages = await Message.findById(messageId);
+    const { getReceiverSocketId, io } = await import("../lib/socket.js");
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageDeleted", { _id: message._id });
+    }
+
+    res.status(200).json({ message: "Message deleted successfully", _id: message._id });
+  } catch (error) {
+    console.log("Error in deleting message", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+

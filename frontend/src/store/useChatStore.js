@@ -4,8 +4,6 @@ import { toast } from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthState } from "./useAuthStore";
 
-
-
 export const useChatStore = create((set, get) => ({
   allContacts: [],
   messages: [],
@@ -14,7 +12,7 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUserLoading: false,
   isMessageLoading: false,
-  isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === "true",
+  isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
 
   toggleSound: () => {
     localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
@@ -22,30 +20,31 @@ export const useChatStore = create((set, get) => ({
   },
   setActiveTab: (tab) => set({ activeChat: tab }),
   setSelectedUser: (user) => set({ selectedUser: user }),
+
   getAllContacts: async () => {
     set({ isUserLoading: true });
     try {
       const res = await axiosInstance.get("/messages/contacts");
       set({ allContacts: res.data });
     } catch (error) {
-      toast.error(error.response.data.message);
-      console.log(error);
+      toast.error(error.response?.data?.message);
     } finally {
       set({ isUserLoading: false });
     }
   },
+
   getMyChats: async () => {
     set({ isUserLoading: true });
     try {
       const res = await axiosInstance.get("/messages/chats");
       set({ chats: res.data });
     } catch (error) {
-      toast.error(error.response.data.message);
-      console.log(error);
+      toast.error(error.response?.data?.message);
     } finally {
       set({ isUserLoading: false });
     }
   },
+
   getMessagesByUserId: async (userId) => {
     set({ isMessageLoading: true });
     try {
@@ -53,11 +52,11 @@ export const useChatStore = create((set, get) => ({
       set({ messages: res.data });
     } catch (error) {
       toast.error(error?.response?.data?.message);
-      console.log(error);
     } finally {
       set({ isMessageLoading: false });
     }
   },
+
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
     const { authUser } = useAuthState.getState();
@@ -68,48 +67,53 @@ export const useChatStore = create((set, get) => ({
       receiverId: selectedUser._id,
       text: messageData.text,
       image: messageData.image,
+      replyTo: messageData.replyTo || null,
       createdAt: new Date().toISOString(),
       isOptimistic: true,
     };
 
-    // immidetaly update the UI
     set({ messages: [...messages, optimisticMessage] });
 
     try {
-      const res = await axiosInstance.post(
-        `/messages/send/${selectedUser?._id}`,
-        messageData
-      );
+      const res = await axiosInstance.post(`/messages/send/${selectedUser?._id}`, messageData);
       set({ messages: messages.concat(res.data) });
     } catch (error) {
-      // remove the optimistic message
-      set({ messages: messages });
+      set({ messages });
       toast.error(error?.response?.data?.message);
-      console.log(error);
     }
   },
+
+  deleteMessage: async (messageId) => {
+    const { messages } = get();
+    const updatedMessages = messages.map((msg) =>
+      msg._id === messageId ? { ...msg, text: "This message was deleted", deleted: true, image: null } : msg
+    );
+    set({ messages: updatedMessages });
+
+    try {
+      await axiosInstance.delete(`/messages/delete/${messageId}`);
+      toast.success("Message deleted successfully"); 
+    } catch (error) {
+      set({ messages });
+      toast.error(error?.response?.data?.message || "Failed to delete message");
+    }
+  },
+
   subscribeToMessages: () => {
     const { selectedUser, isSoundEnabled } = get();
     if (!selectedUser) return;
     const socket = useAuthState.getState().socket;
-    socket.on("newMessage", (newMessage) => {
-      const isMessageSendFromSelecteduser= newMessage.senderId === selectedUser._id;
-      if (!isMessageSendFromSelecteduser) return;
-      const currentMessage = get().messages;
 
-      set({ messages: [...currentMessage, newMessage] });
+    socket.on("newMessage", (newMessage) => {
+      const isFromSelectedUser = newMessage.senderId === selectedUser._id;
+      if (!isFromSelectedUser) return;
+      const currentMessages = get().messages;
+      set({ messages: [...currentMessages, newMessage] });
     });
-    // if (isSoundEnabled) {
-    //   const notificationSound = new Audio("/sounds/notification.mp3");
-    //   notificationSound.currentTime = 0;
-    //   notificationSound
-    //     .play()
-    //     .catch((e) => console.log("Error playing sound", e));
-    // }
   },
-  unSubscribeToMessages: () =>
-    {
-      const socket = useAuthState.getState().socket;
-      socket.off("newMessage");
-    },
+
+  unSubscribeToMessages: () => {
+    const socket = useAuthState.getState().socket;
+    socket.off("newMessage");
+  },
 }));

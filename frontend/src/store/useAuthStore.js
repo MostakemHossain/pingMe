@@ -15,15 +15,13 @@ export const useAuthState = create((set, get) => ({
   onlineUsers: [],
 
   checkAuth: async () => {
-    const token = localStorage.getItem("token");
-  if (!token) {
-    set({ authUser: null, isCheckingAuth: false });
-    return;
-  }
+
     try {
-      const res = await axiosInstance.get("/auth/check",{
-        headers: { Authorization: `${token}` },
+     
+      const res = await axiosInstance.get("/auth/check", {
+        withCredentials: true,
       });
+      console.log(res.data);
       get().connectSocket(); 
       set({ authUser: res.data });
     } catch (error) {
@@ -51,8 +49,13 @@ export const useAuthState = create((set, get) => ({
   login: async (userData) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post("/auth/login", userData);
+      const res = await axiosInstance.post("/auth/login", userData,
+        {
+          credentials: "include", 
+        }
+      );
       set({ authUser: res.data });
+     
       if (res?.data?.user?._id) {
         toast.success("Logged in successful");
       }

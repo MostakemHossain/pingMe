@@ -35,8 +35,6 @@ const Login = () => {
     setValue("password", import.meta.env.VITE_DEMO_PASSWORD);
     setShowDemo(false);
   };
-  const token = localStorage.getItem("token");
-  console.log(token);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
